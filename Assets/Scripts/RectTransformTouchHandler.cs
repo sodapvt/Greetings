@@ -47,6 +47,7 @@ public class RectTransformTouchHandler : MonoBehaviour, IPointerDownHandler, IDr
     {
         stickerType = type;
     }
+private Vector2 pointerOffset;
 
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -55,22 +56,34 @@ public class RectTransformTouchHandler : MonoBehaviour, IPointerDownHandler, IDr
         isPointerDown = true;
         //Set as last sibling
         transform.SetAsLastSibling();
+        // Calculate offset
+    RectTransformUtility.ScreenPointToLocalPointInRectangle(
+        canvas.transform as RectTransform,
+        eventData.position,
+        eventData.pressEventCamera,
+        out pointerOffset
+    );
+
+    pointerOffset = rectTransform.anchoredPosition - pointerOffset;  
         Debug.Log("RectTransformTouchHandler: OnPointerDown");
     }
 
-    public void OnDrag(PointerEventData eventData)
-    {
-        // OnDrag is only called for single-finger drag by Unity's event system
-        // No need to check Input.touchCount here - it causes lag on Android
-        if (canvas == null) 
-        {
-            Debug.LogWarning("RectTransformTouchHandler: Canvas is null, cannot drag.");
-            return;
-        }
 
-        // Directly update position - more responsive on mobile
-        rectTransform.anchoredPosition += eventData.delta;
-    }
+    public void OnDrag(PointerEventData eventData)
+{
+    if (canvas == null) return;
+
+    Vector2 pos;
+    RectTransformUtility.ScreenPointToLocalPointInRectangle(
+        canvas.transform as RectTransform,
+        eventData.position,
+        eventData.pressEventCamera,
+        out pos
+    );
+
+  rectTransform.anchoredPosition = pos + pointerOffset;
+}
+
 
     public void OnPointerUp(PointerEventData eventData)
     {
