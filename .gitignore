@@ -76,3 +76,5 @@ crashlytics-build.properties
 *.log
 *.stackdump
 .vscode
+Greetings_BurstDebugInformation_DoNotShip
+Wishes of Care_BurstDebugInformation_DoNotShip

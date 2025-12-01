@@ -15,9 +15,23 @@ public class RectTransformTouchHandler : MonoBehaviour, IPointerDownHandler, IDr
     private Vector3 initialScale;
     private float initialAngle;
     private Quaternion initialRotation;
+    private bool isPointerDown = false;
+    private Transform originalParent;
+    private Transform dragParent;
 
+    //create enum of type NoneTextSticker,Decoration,ElementSticker
+    public enum StickerType
+    {
+        None,
+        TextSticker,
+        Decoration,
+        ElementSticker
+    }
+    public StickerType stickerType = StickerType.None;       
     private void Awake()
     {
+        originalParent = transform.parent;
+        dragParent = originalParent.parent.GetChild(1);
         rectTransform = GetComponent<RectTransform>();
         canvas = GetComponentInParent<Canvas>();
         if (canvas == null)
@@ -29,9 +43,16 @@ public class RectTransformTouchHandler : MonoBehaviour, IPointerDownHandler, IDr
             Debug.Log($"RectTransformTouchHandler: Initialized. Canvas Scale Factor: {canvas.scaleFactor}");
         }
     }
+    public void SetStickerType(StickerType type)
+    {
+        stickerType = type;
+    }
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        FlowHandler.instance.dustbinImage.transform.parent.gameObject.SetActive(true);
+        transform.SetParent(dragParent);
+        isPointerDown = true;
         //Set as last sibling
         transform.SetAsLastSibling();
         Debug.Log("RectTransformTouchHandler: OnPointerDown");
@@ -39,36 +60,65 @@ public class RectTransformTouchHandler : MonoBehaviour, IPointerDownHandler, IDr
 
     public void OnDrag(PointerEventData eventData)
     {
-        // Only allow single finger drag if we are not pinching/rotating
-        if (Input.touchCount < 2)
+        // OnDrag is only called for single-finger drag by Unity's event system
+        // No need to check Input.touchCount here - it causes lag on Android
+        if (canvas == null) 
         {
-            if (canvas == null) 
-            {
-                Debug.LogWarning("RectTransformTouchHandler: Canvas is null, cannot drag.");
-                return;
-            }
-
-            //Debug.Log($"RectTransformTouchHandler: Dragging. Delta: {eventData.delta}");
-            rectTransform.anchoredPosition += eventData.delta / canvas.scaleFactor;
+            Debug.LogWarning("RectTransformTouchHandler: Canvas is null, cannot drag.");
+            return;
         }
+
+        // Directly update position - more responsive on mobile
+        rectTransform.anchoredPosition += eventData.delta;
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-       //if transform is placed outside the parent destroy the object
+        isPointerDown = false;
+        //if transform is placed outside the parent destroy the object
        RectTransform parentRect = rectTransform.parent.GetComponent<RectTransform>();
        if (parentRect != null)
        {
+           // Check if overlapping with FlowHandler's dustbin
+           if (FlowHandler.instance != null && FlowHandler.instance.dustbinImage != null)
+           {
+               RectTransform dustbinRect = FlowHandler.instance.dustbinImage.GetComponent<RectTransform>();
+               if (dustbinRect != null)
+               {
+                   // Check if this object's bounds overlap with dustbin bounds
+                   Vector3[] dustbinCorners = new Vector3[4];
+                   Vector3[] objectCorners = new Vector3[4];
+                   dustbinRect.GetWorldCorners(dustbinCorners);
+                   rectTransform.GetWorldCorners(objectCorners);
+                   
+                   // Simple overlap check - if object center is within dustbin bounds
+                   Vector3 objectCenter = rectTransform.position;
+                   if (objectCenter.x >= dustbinCorners[0].x && objectCenter.x <= dustbinCorners[2].x &&
+                       objectCenter.y >= dustbinCorners[0].y && objectCenter.y <= dustbinCorners[2].y)
+                   {
+                    FlowHandler.instance.dustbinImage.transform.parent.gameObject.SetActive(false);
+                       Destroy(gameObject);
+                       return;
+                   }
+               }
+           }
+           
            if (!parentRect.rect.Contains(rectTransform.anchoredPosition))
            {
+                FlowHandler.instance.dustbinImage.transform.parent.gameObject.SetActive(false);
                Destroy(gameObject);
+           }else
+           {FlowHandler.instance.dustbinImage.transform.parent.gameObject.SetActive(false);
+              
+               transform.SetParent(originalParent);
            }
        }
     }
 
     private void Update()
     {
-        if (Input.touchCount == 2)
+        // Only process two-finger gestures if this object is currently selected
+        if (Input.touchCount == 2 && isPointerDown)
         {
             Touch touch0 = Input.GetTouch(0);
             Touch touch1 = Input.GetTouch(1);

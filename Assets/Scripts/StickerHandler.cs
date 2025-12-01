@@ -6,11 +6,19 @@ using UnityEngine.UI;
 
 public class StickerHandler : MonoBehaviour
 {
+    public static StickerHandler instance;
     public GameObject stickerPrefab;
     public Transform stickerParent;
     public List<Sprite> stickerList;
     public List<Sprite> elementList;
     public List<Sprite> textList;
+    public List<Color> colorList;
+    public BgHandler bgHandler;
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     public void AddSticker(int index)
     {
@@ -52,6 +60,7 @@ public class StickerHandler : MonoBehaviour
         RectTransform stickerParentRect = stickerParent.GetComponent<RectTransform>();
         GameObject text = Instantiate(stickerPrefab, stickerParent);
         text.GetComponent<Image>().sprite = textList[index];
+        text.GetComponent<Image>().color = colorList[bgHandler.bgIndex];
         
         RectTransform textRect = text.GetComponent<RectTransform>();
         //set the text size as image native size
@@ -62,7 +71,7 @@ public class StickerHandler : MonoBehaviour
         textRect.anchoredPosition = new Vector2(x, y);
         text.transform.localScale = Vector3.zero;
         text.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack);
-        
+        text.GetComponent<RectTransformTouchHandler>().SetStickerType(RectTransformTouchHandler.StickerType.TextSticker);
         SetupTouchHandler(text);
     }
 

@@ -14,14 +14,28 @@ public class PanelHandler : MonoBehaviour
             panel.SetActive(false);
         }
     }
+    private void EnableDefaultPanel()
+    {
+        if (panels.Count > 0)
+        {
+            panels[0].SetActive(true);
+            activePanelIndex = 0;
+        }
+    }
 
     public void ShowPanel(int panelIndex)
     {
+        AudioHandler.instance.PlaySFX("pop");
         panels[activePanelIndex].SetActive(false);
         activePanelIndex = panelIndex;
         if (panelIndex >= 0 && panelIndex < panels.Count)
         {
             panels[panelIndex].SetActive(true);
         }
+    }
+    public void ClosePanel()
+    {
+        panels[activePanelIndex].SetActive(false);
+        activePanelIndex = 0;
     }
 }

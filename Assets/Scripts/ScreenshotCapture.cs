@@ -11,18 +11,19 @@ public class ScreenshotCapture : MonoBehaviour
     public int qualityMultiplier = 2; // Higher values = better quality but larger file size
     
     public void CaptureImageArea()
-    {
+    {AudioHandler.instance.PlaySFX("pop");
         if (targetImage == null)
         {
             Debug.LogError("Target image is not assigned!");
             return;
         }
-        
+          AndroidToaster.ShowToast("Saving Image...");
         StartCoroutine(CaptureArea());
     }
     
     private IEnumerator CaptureArea()
     {
+      
         // Wait for end of frame to ensure everything is rendered
         yield return new WaitForEndOfFrame();
         
@@ -80,15 +81,90 @@ public class ScreenshotCapture : MonoBehaviour
         string timestamp = System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
         string uniqueFileName = $"{saveFileName}_{timestamp}.png";
         
-        // Save to persistent data path
-        string filePath = Path.Combine(Application.persistentDataPath, uniqueFileName);
-        File.WriteAllBytes(filePath, bytes);
+        // Save to gallery (Android) or persistent path (Editor)
+        string filePath = SaveToGallery(bytes, uniqueFileName);
         
-        Debug.Log($"High quality screenshot saved to: {filePath} ({finalWidth}x{finalHeight})");
+        if (!string.IsNullOrEmpty(filePath))
+        {
+            Debug.Log($"High quality screenshot saved to: {filePath} ({finalWidth}x{finalHeight})");
+            AndroidToaster.ShowToast("Image saved to gallery!");
+        }
+        else
+        {
+            Debug.LogError("Failed to save screenshot");
+            AndroidToaster.ShowToast("Failed to save image");
+        }
         
         // Clean up
         Destroy(finalTexture);
     }
+    
+    private string SaveToGallery(byte[] imageBytes, string fileName)
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        return SaveToGalleryAndroid(imageBytes, fileName);
+#else
+        // For editor/other platforms, save to persistent data path
+        string path = Path.Combine(Application.persistentDataPath, fileName);
+        File.WriteAllBytes(path, imageBytes);
+        return path;
+#endif
+    }
+    
+#if UNITY_ANDROID
+    private string SaveToGalleryAndroid(byte[] imageBytes, string fileName)
+    {
+        try
+        {
+            // Save to Pictures directory
+            using (AndroidJavaClass environment = new AndroidJavaClass("android.os.Environment"))
+            {
+                using (AndroidJavaObject picturesDir = environment.CallStatic<AndroidJavaObject>("getExternalStoragePublicDirectory", 
+                    environment.GetStatic<string>("DIRECTORY_PICTURES")))
+                {
+                    string picturesPath = picturesDir.Call<string>("getAbsolutePath");
+                    string greetingsFolder = Path.Combine(picturesPath, "Greetings");
+                    
+                    // Create directory if it doesn't exist
+                    if (!Directory.Exists(greetingsFolder))
+                    {
+                        Directory.CreateDirectory(greetingsFolder);
+                    }
+                    
+                    string filePath = Path.Combine(greetingsFolder, fileName);
+                    File.WriteAllBytes(filePath, imageBytes);
+                    
+                    // Notify media scanner to make it visible in gallery
+                    ScanFile(filePath);
+                    
+                    return filePath;
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error saving to gallery: {e.Message}");
+            return null;
+        }
+    }
+    
+    private void ScanFile(string path)
+    {
+        using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+        {
+            using (AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+            {
+                using (AndroidJavaObject context = currentActivity.Call<AndroidJavaObject>("getApplicationContext"))
+                {
+                    using (AndroidJavaClass mediaScanner = new AndroidJavaClass("android.media.MediaScannerConnection"))
+                    {
+                        mediaScanner.CallStatic("scanFile", context, new string[] { path }, null, null);
+                    }
+                }
+            }
+        }
+    }
+#endif
     
     private Texture2D ScaleTexture(Texture2D source, int targetWidth, int targetHeight)
     {

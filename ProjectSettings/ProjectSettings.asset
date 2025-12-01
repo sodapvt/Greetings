@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: SODA pvt
-  productName: Greetings
+  productName: Wishes of Care
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -162,7 +162,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.SODApvt.Greetings
+    Android: com.SODApvt.wishesofcare
     Standalone: com.DefaultCompany.2DProject
   buildNumber:
     Standalone: 0
@@ -291,7 +291,7 @@ PlayerSettings:
   - m_BuildTarget: 
     m_Icons:
     - serializedVersion: 2
-      m_Icon: {fileID: 2800000, guid: 07837510154736b4fa7d13449ef809cd, type: 3}
+      m_Icon: {fileID: 2800000, guid: b215a79c582c47748aeb425312f3ff61, type: 3}
       m_Width: 128
       m_Height: 128
       m_Kind: 0
