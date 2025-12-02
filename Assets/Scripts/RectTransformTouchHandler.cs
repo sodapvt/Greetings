@@ -110,6 +110,7 @@ private Vector2 pointerOffset;
                        objectCenter.y >= dustbinCorners[0].y && objectCenter.y <= dustbinCorners[2].y)
                    {
                     FlowHandler.instance.dustbinImage.transform.parent.gameObject.SetActive(false);
+                     AudioHandler.instance.PlaySFX("delete");
                        Destroy(gameObject);
                        return;
                    }
@@ -119,6 +120,7 @@ private Vector2 pointerOffset;
            if (!parentRect.rect.Contains(rectTransform.anchoredPosition))
            {
                 FlowHandler.instance.dustbinImage.transform.parent.gameObject.SetActive(false);
+                 AudioHandler.instance.PlaySFX("delete");
                Destroy(gameObject);
            }else
            {FlowHandler.instance.dustbinImage.transform.parent.gameObject.SetActive(false);

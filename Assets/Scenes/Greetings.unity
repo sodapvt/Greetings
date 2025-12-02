@@ -1122,6 +1122,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetImage: {fileID: 1346709999}
+  offsetImage: {fileID: 1398542315}
   qualityMultiplier: 2
   panelHandler: {fileID: 1126639458}
 --- !u!1 &130958903
@@ -1159,7 +1160,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -30, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &130958905
 MonoBehaviour:
@@ -8769,6 +8770,7 @@ MonoBehaviour:
   click: {fileID: 8300000, guid: baadcae77663ffc4889267416ba477fe, type: 3}
   appear: {fileID: 8300000, guid: 5502ca3e1758aca44aab67c0b1a4cec8, type: 3}
   pop: {fileID: 8300000, guid: f0dd8f264bbcb3e449ff7c6ce951c780, type: 3}
+  delete: {fileID: 8300000, guid: 874a4b29ca19d614895d9bad20f66bff, type: 3}
   create: {fileID: 8300000, guid: fcfa5ffb449dab046989d51dc131bc3c, type: 3}
   wish: {fileID: 8300000, guid: 55e4f409c0fc8ff4f90aadf6247ca923, type: 3}
 --- !u!4 &952437433
@@ -10461,6 +10463,7 @@ GameObject:
   - component: {fileID: 1126639461}
   - component: {fileID: 1126639460}
   - component: {fileID: 1126639462}
+  - component: {fileID: 1126639463}
   m_Layer: 0
   m_Name: Scripts
   m_TagString: Untagged
@@ -10578,11 +10581,11 @@ MonoBehaviour:
   - {r: 0.6156863, g: 0.34901962, b: 0.14117648, a: 1}
   - {r: 1, g: 1, b: 1, a: 1}
   - {r: 0.10980392, g: 0.4, b: 0.39215687, a: 1}
-  - {r: 0.67058825, g: 0.2784314, b: 0.23137255, a: 1}
+  - {r: 1, g: 1, b: 1, a: 1}
   - {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
-  - {r: 1, g: 0.8745098, b: 0.47058824, a: 1}
-  - {r: 0.59607846, g: 0.972549, b: 1, a: 1}
-  - {r: 0.0627451, g: 0.30980393, b: 0.27058825, a: 1}
+  - {r: 0, g: 0, b: 0, a: 1}
+  - {r: 0, g: 0, b: 0, a: 1}
+  - {r: 0, g: 0, b: 0, a: 1}
   bgHandler: {fileID: 1126639460}
 --- !u!114 &1126639462
 MonoBehaviour:
@@ -10607,6 +10610,23 @@ MonoBehaviour:
   dustbinImage: {fileID: 194698281}
   bgScroll: {fileID: 659253796}
   doctorNameEntered: 0
+--- !u!114 &1126639463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1126639457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e94e141eaba635449fff770cf7c9a63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetImage: {fileID: 1346709999}
+  offsetImage: {fileID: 1398542315}
+  saveFileName: greeting
+  qualityMultiplier: 2
+  panelToHide: {fileID: 769698116}
 --- !u!1 &1129185791
 GameObject:
   m_ObjectHideFlags: 0
@@ -17338,7 +17358,6 @@ GameObject:
   - component: {fileID: 1798019260}
   - component: {fileID: 1798019259}
   - component: {fileID: 1798019262}
-  - component: {fileID: 1798019261}
   m_Layer: 5
   m_Name: Save
   m_TagString: Untagged
@@ -17404,21 +17423,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1798019257}
   m_CullTransparentMesh: 1
---- !u!114 &1798019261
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1798019257}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e94e141eaba635449fff770cf7c9a63, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetImage: {fileID: 1346709999}
-  saveFileName: greeting
-  qualityMultiplier: 2
 --- !u!114 &1798019262
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17463,7 +17467,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1798019261}
+      - m_Target: {fileID: 1126639463}
         m_TargetAssemblyTypeName: ScreenshotCapture, Assembly-CSharp
         m_MethodName: CaptureImageArea
         m_Mode: 1

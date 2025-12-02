@@ -7,7 +7,7 @@ public class AudioHandler : MonoBehaviour
 {
     internal static AudioHandler instance;
     [SerializeField] private AudioSource sfxAudioSource, voAudioSource,extraAudioSource;
-    [SerializeField] private AudioClip click,appear,pop;
+    [SerializeField] private AudioClip click,appear,pop,delete;
     [SerializeField]
     private AudioClip create, wish;
     int shakingIndex = 0;
@@ -29,6 +29,9 @@ public class AudioHandler : MonoBehaviour
                 break;
             case "pop":
                 clip = pop;
+                break;
+            case "delete":
+                clip = delete;
                 break;
             // Add more cases for other SFX clips as needed
             default:

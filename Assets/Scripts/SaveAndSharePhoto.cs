@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class SaveAndSharePhoto : MonoBehaviour
 {
-    public Image targetImage;
+    public Image targetImage,offsetImage;
     [Range(1, 4)]
     public int qualityMultiplier = 2;
     
@@ -71,19 +71,41 @@ public class SaveAndSharePhoto : MonoBehaviour
     private byte[] CaptureImageArea()
     {
         RectTransform rectTransform = targetImage.rectTransform;
-        
+         RectTransform offsetRectTransform = offsetImage.rectTransform;
         Vector3[] corners = new Vector3[4];
         rectTransform.GetWorldCorners(corners);
-        
+         Vector3[] offsetCorners = new Vector3[4];
+        offsetRectTransform.GetWorldCorners(offsetCorners);
         for (int i = 0; i < corners.Length; i++)
         {
             corners[i] = RectTransformUtility.WorldToScreenPoint(Camera.main, corners[i]);
         }
-        
-        float minX = corners[0].x;
-        float minY = corners[0].y;
-        float maxX = corners[2].x;
-        float maxY = corners[2].y;
+        for (int i = 0; i < offsetCorners.Length; i++)
+        {
+            offsetCorners[i] = RectTransformUtility.WorldToScreenPoint(Camera.main, offsetCorners[i]);
+        }
+
+        float minX ;
+        float minY ;
+        float maxX ;
+        float maxY;  
+        if (FlowHandler.instance.doctorNameEntered)
+        {
+                    // Calculate combined bounds (targetImage + offsetImage)
+ minX = Mathf.Min(corners[0].x, offsetCorners[0].x);
+ minY = Mathf.Min(corners[0].y, offsetCorners[0].y);
+
+ maxX = Mathf.Max(corners[2].x, offsetCorners[2].x);
+ maxY = Mathf.Max(corners[2].y, offsetCorners[2].y);
+        }
+        else
+        {
+                  // Calculate the bounds
+         minX = corners[0].x;
+         minY = corners[0].y;
+         maxX = corners[2].x;
+         maxY = corners[2].y;  
+        }
         
         int width = Mathf.RoundToInt(maxX - minX);
         int height = Mathf.RoundToInt(maxY - minY);

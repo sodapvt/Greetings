@@ -5,46 +5,89 @@ using UnityEngine.UI;
 
 public class ScreenshotCapture : MonoBehaviour
 {
-    public Image targetImage;
+    public Image targetImage,offsetImage;
     public string saveFileName = "greeting";
     [Range(1, 4)]
     public int qualityMultiplier = 2; // Higher values = better quality but larger file size
-    
+     private bool isProcessing = false;
     public void CaptureImageArea()
-    {AudioHandler.instance.PlaySFX("pop");
+    { HidePanel();
+    Debug.Log("Panel hidden");
+        AudioHandler.instance.PlaySFX("pop");
+       
+        if (isProcessing)
+        {
+            Debug.Log("Already processing...");
+            return;
+        }
         if (targetImage == null)
         {
             Debug.LogError("Target image is not assigned!");
             return;
         }
-          AndroidToaster.ShowToast("Saving Image...");
+        AndroidToaster.ShowToast("Saving Image...");
         StartCoroutine(CaptureArea());
+    }
+    [SerializeField] private GameObject panelToHide;
+    private void HidePanel()
+    {
+        if (panelToHide != null)
+        {
+            panelToHide.SetActive(false);
+        }
     }
     
     private IEnumerator CaptureArea()
     {
-      
+       isProcessing = true;
         // Wait for end of frame to ensure everything is rendered
         yield return new WaitForEndOfFrame();
         
         // Get the RectTransform of the target image
         RectTransform rectTransform = targetImage.rectTransform;
+        RectTransform offsetRectTransform = offsetImage.rectTransform;
         
         // Get the corners of the RectTransform in screen space
         Vector3[] corners = new Vector3[4];
         rectTransform.GetWorldCorners(corners);
+        Vector3[] offsetCorners = new Vector3[4];
+        offsetRectTransform.GetWorldCorners(offsetCorners);
         
         // Convert world corners to screen space
         for (int i = 0; i < corners.Length; i++)
         {
             corners[i] = RectTransformUtility.WorldToScreenPoint(Camera.main, corners[i]);
         }
+        for (int i = 0; i < offsetCorners.Length; i++)
+        {
+            offsetCorners[i] = RectTransformUtility.WorldToScreenPoint(Camera.main, offsetCorners[i]);
+        }
+                          // Calculate the bounds
+        float minX ;
+        float minY ;
+        float maxX ;
+        float maxY;  
+        if (FlowHandler.instance.doctorNameEntered)
+        {
+                    // Calculate combined bounds (targetImage + offsetImage)
+ minX = Mathf.Min(corners[0].x, offsetCorners[0].x);
+ minY = Mathf.Min(corners[0].y, offsetCorners[0].y);
+
+ maxX = Mathf.Max(corners[2].x, offsetCorners[2].x);
+ maxY = Mathf.Max(corners[2].y, offsetCorners[2].y);
+        }
+        else
+        {
+                  // Calculate the bounds
+         minX = corners[0].x;
+         minY = corners[0].y;
+         maxX = corners[2].x;
+         maxY = corners[2].y;  
+        }
+
+
         
-        // Calculate the bounds
-        float minX = corners[0].x;
-        float minY = corners[0].y;
-        float maxX = corners[2].x;
-        float maxY = corners[2].y;
+
         
         int width = Mathf.RoundToInt(maxX - minX);
         int height = Mathf.RoundToInt(maxY - minY);
@@ -94,7 +137,7 @@ public class ScreenshotCapture : MonoBehaviour
             Debug.LogError("Failed to save screenshot");
             AndroidToaster.ShowToast("Failed to save image");
         }
-        
+        isProcessing = false;
         // Clean up
         Destroy(finalTexture);
     }
